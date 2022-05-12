@@ -2,7 +2,6 @@ import db from "../database.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-
 const logIn = async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -24,10 +23,19 @@ const logIn = async (req, res) => {
 };
 
 const signUp = async (req, res) => {
-    const {name, email, password, cardNumber, cardCode, cardExpire, cardName, cardType} = req.body
+    const {
+        name,
+        email,
+        password,
+        cardNumber,
+        cardCode,
+        cardExpire,
+        cardName,
+        cardType,
+    } = req.body;
 
     try {
-        const user = await db.collection("users").findOne({email});
+        const user = await db.collection("users").findOne({ email });
 
         if (user) {
             res.status(409).send("Usuário já existe");
@@ -41,16 +49,14 @@ const signUp = async (req, res) => {
             cardCode,
             cardExpire,
             cardName,
-            cardType
+            cardType,
         });
 
         return res.status(201).send("Usuário criado com sucesso!");
-
     } catch (error) {
         console.log("Erro ao cadastrar usuário");
-        return res.sendStatus(500)
+        return res.sendStatus(500);
     }
 };
-
 
 export { logIn, signUp };
