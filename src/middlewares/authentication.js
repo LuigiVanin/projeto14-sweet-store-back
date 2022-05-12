@@ -8,7 +8,12 @@ const authentication = async (req, res, next) => {
         return res.status(422).send({ message: "token inexistente" });
     }
     try {
-        const { id } = jwt.verify(authorization, process.env.JWT_KEY);
+        const { id, iat } = jwt.verify(authorization, process.env.JWT_KEY);
+        const timeNowInSeconds = Date.now() / 1000;
+        console.log(timeNowInSeconds - iat);
+        if (timeNowInSeconds - iat > 15 * 60) {
+            return res.status(401).send({ message: "your token is too old!" });
+        }
         const user = await db
             .collection("users")
             .findOne({ _id: new ObjectId(id) });
