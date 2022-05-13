@@ -3,10 +3,12 @@ import { ObjectId } from "mongodb";
 import db from "../database.js";
 
 const authentication = async (req, res, next) => {
-    const { authorization } = req.headers;
+    let { authorization } = req.headers;
     if (!authorization) {
         return res.status(422).send({ message: "token inexistente" });
     }
+    authorization = authorization.replace("Bearer", "").trim();
+    console.log(authorization);
     try {
         const { id, iat } = jwt.verify(authorization, process.env.JWT_KEY);
         const timeNowInSeconds = Date.now() / 1000;
