@@ -33,4 +33,23 @@ const getCategories = async (req, res) => {
     }
 };
 
-export { getItems, getCategories };
+const getItemByCategory = async (req, res) => {
+    const { categoryId } = req.params;
+    try {
+        const items = await db
+            .collection("items")
+            .find({ categoryId })
+            .toArray();
+        if (!items.length) {
+            return res
+                .status(422)
+                .send({ message: "essa categoria não existe" });
+        }
+        return res.status(200).send(items);
+    } catch (err) {
+        console.log(err);
+        return res.sendStatu(500);
+    }
+};
+
+export { getItems, getCategories, getItemByCategory };
