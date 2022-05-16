@@ -54,7 +54,6 @@ const callFromCart = async (req, res) => {
 
 const updateValue = async (req, res) => {
     const {update, itemId} = req.body;
-    console.log(update, itemId);
     try {
 
         if(update === "increase") {
@@ -64,6 +63,11 @@ const updateValue = async (req, res) => {
         } else if (update === "decrease") {
     
             await db.collection("carts").updateOne({itemId}, {$inc: {amount: -1}});
+
+            const product = await db.collection("carts").findOne({itemId});
+            if (product.amount <= 0) {
+                await db.collection("carts").deleteOne({itemId});
+            }
     
         }
         res.status(200).send("Atualizou o valor");
