@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import db from "../database.js";
 
 const addToCart = async (req, res) => {
@@ -9,14 +10,22 @@ const addToCart = async (req, res) => {
         const item = await db.collection("carts").findOne({itemId});
         
         if(item) {
-            console.log(item)
-            item.amount = parseInt(item.amount) + 1
+            
+            await db.collection("carts").updateOne({itemId}, {$inc: {amount: 1}});
             
         } else {
+
+            const productInfo = await db.collection("items").findOne({_id: new ObjectId(itemId)});
+            console.log(productInfo)
+            
             await db.collection("carts").insertOne({
                 itemId,
                 email,
-                amount
+                amount,
+                name: productInfo.name,
+                price: productInfo.price,
+                image: productInfo.image,
+                description: productInfo.description
             });
         }
 
@@ -31,4 +40,16 @@ const addToCart = async (req, res) => {
 
 }
 
-export { addToCart }
+const callFromCart = async (req, res) => {
+
+    const { email } = res.locals.user;
+    
+    try {
+        const cartItems = await db.collection("carts").find({email}).toArray();
+        res.status(200).send(cartItems);
+    } catch (error) {
+        res.sendStatus(500)
+    }
+}
+
+export { addToCart, callFromCart }
