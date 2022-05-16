@@ -3,7 +3,6 @@ import db from "../database.js";
 const addAddress = async (req, res) => {
     const { email } = res.locals.user;
     const body = req.body;
-    console.log(body)
 
     try {
 
@@ -11,7 +10,9 @@ const addAddress = async (req, res) => {
 
         if(!addressInfo) {
             await db.collection("address").insertOne(body);
-        }      
+        } else {
+            await db.collection("address").updateOne({email}, {$set: body});
+        }
 
         res.status(200).send("Informações de endereço adicionadas na coleção");
 
@@ -28,10 +29,9 @@ const callInfo = async (req, res) => {
 
     try {
         const info = await db.collection("carts").find({email}).toArray();
-        console.log(info)
         res.status(200).send(info);
     } catch (error) {
-        res.sendStatus(500)
+        res.sendStatus(500);
     }
 }
 
@@ -39,8 +39,31 @@ const endShopping = async (req, res) => {
     const { email } = res.locals.user;
     const body = req.body;
 
-    const address = await db.collection("address").findOne({email});
-    await db.collection("sales").insertOne({...body, address})
+    try {
+
+        const address = await db.collection("address").findOne({email});
+        await db.collection("sales").insertOne({...body, address});
+        await db.collection("carts").deleteMany({email});
+        res.status(200).send("Compra efetuada com sucesso!");
+
+    } catch (error) {
+
+        console.log(error);
+        res.sendStatus(500);
+
+    }
 }
 
-export {addAddress, callInfo, endShopping}
+const getAddress = async (req, res) => {
+    const { email } = res.locals.user;
+
+    try {
+        const info = await db.collection("address").findOne({email});
+        res.status(200).send(info);
+    } catch (error) {
+        res.sendStatus(500);
+    }
+}
+
+
+export {addAddress, callInfo, endShopping, getAddress}

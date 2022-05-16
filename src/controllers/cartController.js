@@ -52,4 +52,26 @@ const callFromCart = async (req, res) => {
     }
 }
 
-export { addToCart, callFromCart }
+const updateValue = async (req, res) => {
+    const {update, itemId} = req.body;
+    console.log(update, itemId);
+    try {
+
+        if(update === "increase") {
+    
+            await db.collection("carts").updateOne({itemId}, {$inc: {amount: 1}});
+    
+        } else if (update === "decrease") {
+    
+            await db.collection("carts").updateOne({itemId}, {$inc: {amount: -1}});
+    
+        }
+        res.status(200).send("Atualizou o valor");
+        
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("Não atualizou o valor");
+    }
+}
+
+export { addToCart, callFromCart, updateValue }
